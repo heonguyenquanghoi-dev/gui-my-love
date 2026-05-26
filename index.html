@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gửi My Anh 💕</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background-color: #040212;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #startBtn {
+            position: absolute;
+            z-index: 10;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(45deg, #ff4081, #ff80ab);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px #ff4081, 0 0 40px #ff80ab;
+            transition: all 0.3s ease;
+            animation: pulse 1.5s infinite;
+        }
+
+        #startBtn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px #ff4081, 0 0 60px #ff007f;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .hide {
+            opacity: 0;
+            transform: translate(-50%, -20px);
+            transition: all 2s ease;
+            visibility: hidden;
+            position: absolute;
+        }
+
+        .show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+            visibility: visible;
+            position: absolute;
+        }
+
+        .content {
+            top: 10%;
+            left: 50%;
+            text-align: center;
+            z-index: 2;
+            pointer-events: none;
+            width: 100%;
+        }
+
+        .small-text {
+            font-size: 15px;
+            color: #ff80ab;
+            text-shadow: 0 0 8px #ff4081;
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+
+        .main-text {
+            font-size: 36px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 15px #ff007f, 0 0 30px #ff007f;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .highlight-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .footer-text {
+            bottom: 8%;
+            left: 50%;
+            font-size: 16px;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Khung chứa mã QR đã sửa lỗi hiển thị */
+        .qr-container {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            z-index: 5;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 12px;
+            border-radius: 15px;
+            border: 2px solid #ff4081;
+            box-shadow: 0 0 15px #ff4081;
+            text-align: center;
+            transition: all 2s ease;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+        }
+
+        .qr-container.show-qr {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .qr-container p {
+            color: #ff80ab;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 0 0 5px #ff4081;
+        }
+
+        /* Hộp chứa QR hiển thị rõ nét chi tiết các ô mã vạch */
+        .qr-wrapper {
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            position: relative;
+        }
+
+        #qrcode img {
+            display: block;
+        }
+
+        /* Thêm icon trái tim đỏ ở giữa mã QR để tạo điểm nhấn tình yêu */
+        .qr-center-heart {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            background-color: #ff0055;
+            clip-path: path("M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z");
+            transform-origin: center;
+            scale: 0.9;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <button id="startBtn">Bấm vào đây đi công chúa 💖</button>
+
+    <div class="content hide" id="textContent">
+        <div class="small-text">Vũ trụ này có hàng triệu vì sao...</div>
+        <div class="main-text">My Anh yêu em</div>
+        <div class="highlight-text">Em là duy nhất của anh ✨</div>
+    </div>
+    
+    <div class="footer-text hide" id="footerContent">My Anh là cả thế giới của anh 🌍</div>
+
+    <div class="qr-container" id="qrContent">
+        <p>QUÉT ĐỂ XEM TRANG</p>
+        <div class="qr-wrapper">
+            <div id="qrcode"></div>
+            <div class="qr-center-heart"></div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const stars = [];
+        const heartStars = [];
+        const floatingTexts = [];
+        let isActivated = false;
+
+        let heartbeat = 1;
+        let heartbeatTarget = 1;
+        let heartScale = Math.min(width, height) * 0.0055;
+
+        const mouse = { x: width / 2, y: height / 2, active: false };
+        const textPool = ["Anh yêu em", "My", "Anh yêu em My", "Yêu em", "My ơi"];
+
+        function heartShape(t, scale = 1) {
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+            return { x: x * scale, y: y * scale };
+        }
+
+        function createHeartStars(count = 1500) {
+            const centerX = width / 2;
+            const centerY = height / 2 + 40;
+            
+            for (let i = 0; i < count; i++) {
+                const t = (i / count) * Math.PI * 2;
+                const heart = heartShape(t, heartScale);
+                
+                const randomDist = Math.random() * Math.max(width, height);
+                const randomAngle = Math.random() * Math.PI * 2;
+
+                heartStars.push({
+                    baseX: heart.x + centerX,
+                    baseY: heart.y + centerY,
+                    x: centerX + Math.cos(randomAngle) * randomDist,
+                    y: centerY + Math.sin(randomAngle) * randomDist,
+                    speedX: (Math.random() - 0.5) * 4,
+                    speedY: (Math.random() - 0.5) * 4,
+                    size: Math.random() * 2.5 + 0.5,
+                    alpha: Math.random(),
+                    color: `rgba(255, ${Math.floor(Math.random() * 100 + 40)}, ${Math.floor(Math.random() * 120 + 120)},`
+                });
+            }
+        }
+
+        function createFloatingTexts(count = 25) {
+            for (let i = 0; i < count; i++) {
+                floatingTexts.push({
+                    text: textPool[Math.floor(Math.random() * textPool.length)],
+                    angle: Math.random() * Math.PI * 2,
+                    radiusX: Math.random() * 100 + 180,
+                    radiusY: Math.random() * 80 + 120,
+                    speed: (Math.random() * 0.01 + 0.005),
+                    yOffset: (Math.random() - 0.5) * 200,
+                    color: Math.random() > 0.5 ? '#ff66b2' : '#ffffff'
+                });
+            }
+        }
+
+        function createBackgroundStars(count = 120) {
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: Math.random() * 1.5,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.01 + 0.005
+                });
+            }
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+            mouse.active = true;
+        });
+        window.addEventListener('touchmove', (e) => {
+            if(e.touches.length > 0) {
+                mouse.x = e.touches[0].clientX;
+                mouse.y = e.touches[0].clientY;
+                mouse.active = true;
+            }
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0) star.speed = -star.speed;
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, star.alpha)})`;
+                ctx.fillRect(star.x, star.y, star.size, star.size);
+            });
+
+            if (isActivated) {
+                heartbeat += (heartbeatTarget - heartbeat) * 0.05;
+                if (Math.abs(heartbeat - heartbeatTarget) < 0.01) {
+                    heartbeatTarget = heartbeatTarget === 1 ? 1.15 : 1;
+                }
+
+                const centerX = width / 2;
+                const centerY = height / 2 + 40;
+
+                heartStars.forEach(star => {
+                    const targetX = centerX + (star.baseX - centerX) * heartbeat;
+                    const targetY = centerY + (star.baseY - centerY) * heartbeat;
+                    
+                    star.x += (targetX - star.x) * 0.04;
+                    star.y += (targetY - star.y) * 0.04;
+                    
+                    star.alpha += (Math.random() - 0.5) * 0.08;
+                    if (star.alpha > 1) star.alpha = 1;
+                    if (star.alpha < 0.2) star.alpha = 0.2;
+
+                    ctx.fillStyle = `${star.color} ${star.alpha})`;
+                    ctx.shadowBlur = 6;
+                    ctx.shadowColor = '#ff3399';
+                    
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                floatingTexts.sort((a, b) => Math.sin(a.angle) - Math.sin(b.angle));
+
+                floatingTexts.forEach(tData => {
+                    tData.angle += tData.speed;
+                    const zVirtual = Math.sin(tData.angle); 
+                    const scale3D = (zVirtual + 2) / 3; 
+
+                    const txtX = centerX + Math.cos(tData.angle) * tData.radiusX;
+                    const txtY = centerY + tData.yOffset + (Math.sin(tData.angle * 2) * 10);
+
+                    ctx.font = `italic bold ${Math.floor(13 * scale3D)}px 'Segoe UI', sans-serif`;
+                    ctx.fillStyle = tData.color;
+                    ctx.globalAlpha = (zVirtual + 1.5) / 2.5; 
+                    
+                    ctx.shadowBlur = 10 * scale3D;
+                    ctx.shadowColor = '#ff4081';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+
+                    ctx.fillText(tData.text, txtX, txtY);
+                });
+
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('startBtn').addEventListener('click', function() {
+            this.style.display = 'none';
+            isActivated = true;
+            
+            let currentUrl = window.location.href;
+            // Nếu bạn đang mở bằng file:// cục bộ, gán một đường link mẫu để QR hiển thị các ô vuông màu hồng rõ nét
+            if (currentUrl.startsWith('file:///')) {
+                currentUrl = 'https://my-anh-cua-anh.vercel.app'; 
+            }
+
+            // Tạo mã QR màu hồng đậm với độ chính xác cao
+            new QRCode(document.getElementById("qrcode"), {
+                text: currentUrl,
+                width: 120,
+                height: 120,
+                colorDark : "#ff0055", 
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            document.getElementById('textContent').classList.remove('hide');
+            document.getElementById('textContent').classList.add('show');
+            document.getElementById('footerContent').classList.remove('hide');
+            document.getElementById('footerContent').classList.add('show');
+            document.getElementById('qrContent').classList.add('show-qr');
+        });
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            heartScale = Math.min(width, height) * 0.0055;
+            heartStars.length = 0;
+            stars.length = 0;
+            floatingTexts.length = 0;
+            createHeartStars();
+            createBackgroundStars();
+            createFloatingTexts();
+        });
+
+        createHeartStars();
+        createBackgroundStars();
+        createFloatingTexts();
+        animate();
+    </script>
+</body>
+</html>
